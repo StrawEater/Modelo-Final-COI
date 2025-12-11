@@ -102,7 +102,9 @@ class GeneticAlgorithmDNA:
         perturbed_batch = [individual.apply_to_sequence(seq) for seq in original_sequences]
         entropies = self.calculate_prediction_entropy_batch(perturbed_batch)
 
-        mean_entropy = np.mean(entropies)
+        relative_entropy = entropies/(self.current_entropy + 0.001)
+
+        mean_entropy = np.mean(relative_entropy)
         entropy_score = mean_entropy * self.entropy_weight
 
         # Penalize number of Ns
@@ -204,7 +206,7 @@ class GeneticAlgorithmDNA:
         
         mutated = individual.copy(False)
         # Choose mutation type with bias toward continuity-preserving mutations
-        mutation_types = ['add_continuous','remove_segment', 'extend_segment','merge_segments','split_segment','shift_segment','shift_segment']
+        mutation_types = ['add_continuous','remove_segment', 'extend_segment','merge_segments','split_segment','shift_segment']
 
         mutation_type = random.choice(mutation_types)
         
@@ -308,6 +310,8 @@ class GeneticAlgorithmDNA:
 
             pbar = tqdm(dataloader, desc="Evolution")
             for sequences, _ in pbar:
+
+                self.current_entropy = self.calculate_prediction_entropy_batch(sequences)
                 population, best_ind, avg_fitness = self.evolve_generation(population, sequences)
 
                 new_best_fitness = best_ind.fitness
