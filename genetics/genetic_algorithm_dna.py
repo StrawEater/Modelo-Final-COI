@@ -86,7 +86,7 @@ class GeneticAlgorithmDNA:
             avg_entropy_for_seq = np.mean(rank_entropies)
             sequence_entropies.append(avg_entropy_for_seq)
 
-        return sequence_entropies
+        return np.asarray(sequence_entropies)
     
     def evaluate_fitness(self, individual: DNASequencePerturber, original_sequences: List[str]) -> float:
         
