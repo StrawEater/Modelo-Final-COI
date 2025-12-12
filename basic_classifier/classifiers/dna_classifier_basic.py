@@ -42,6 +42,7 @@ class DNAClassifier(nn.Module):
     def forward(self, sequences):
         
         features = self.embedder(sequences)
+        features = features.unsqueeze(1)
         
         pre_processing = []
         for rank_preprocess in self.rank_classifiers_pre_process:

@@ -56,11 +56,9 @@ def train_basic_classifier(model, train_loader, val_loader, training_config, opt
     # Training loop
     for epoch in range(NUM_EPOCHS):
         
-        loss_weights = model.get_dynamic_loss_weights(epoch, NUM_EPOCHS)
-
         # Train
-        train_metrics = train_epoch(model, train_loader, criterion, optimizer, DEVICE, loss_weights)
-        val_metrics = evaluate(model, val_loader, criterion, DEVICE, loss_weights)
+        train_metrics = train_epoch(model, train_loader, criterion, optimizer, DEVICE)
+        val_metrics = evaluate(model, val_loader, criterion, DEVICE)
 
         # Learning rate scheduling
         scheduler.step()
@@ -69,7 +67,6 @@ def train_basic_classifier(model, train_loader, val_loader, training_config, opt
         history['val'].append(val_metrics)
 
         print(f"\nEpoch [{epoch+1}/{NUM_EPOCHS}]")
-        print(f"  Weight- {loss_weights}")
         print(f"  Train - Loss: {train_metrics['loss_avg']:.4f}, Rank Loss: {train_metrics['loss_rank_avg']}")
         print(f"          Top-1: {train_metrics['top1_acc']:.4f}, Top-5: {train_metrics['top5_acc']:.4f}")
         print(f"          Rank Top-1: {train_metrics['top1_rank_acc']}, Rank Top-5: {train_metrics['top5_rank_acc']}")

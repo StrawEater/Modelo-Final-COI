@@ -27,7 +27,7 @@ def do_criterion_by_rank( predictions, labels, criterion, device):
   
   return loss, loss_by_rank
 
-def train_epoch(model, dataloader, criterion, optimizer, device, loss_weights):
+def train_epoch(model, dataloader, criterion, optimizer, device):
   """Train for one epoch"""
   
   model.train()
@@ -52,30 +52,30 @@ def train_epoch(model, dataloader, criterion, optimizer, device, loss_weights):
 
     outputs = model(list(sequences))
 
-    # loss, loss_by_rank = do_criterion_by_rank(outputs, labels, criterion, device)
+    loss, loss_by_rank = do_criterion_by_rank(outputs, labels, criterion, device)
     
-    # total_loss += loss.item()
-    # total_loss_by_rank += loss_by_rank
+    total_loss += loss.item()
+    total_loss_by_rank += loss_by_rank
 
-    # loss.backward()
-    # optimizer.step()
+    loss.backward()
+    optimizer.step()
     
-    # for idx, out in enumerate(outputs):
-    #   batch_size = out.size(0)
-    #   total += batch_size
+    for idx, out in enumerate(outputs):
+      batch_size = out.size(0)
+      total += batch_size
       
-    #   # Top-1
-    #   preds = torch.argmax(out, dim=1)
-    #   correctas_top1 = (preds == labels[:, idx]).sum().item() 
-    #   top1_correct += correctas_top1 
-    #   top1_by_rank[idx] += correctas_top1
+      # Top-1
+      preds = torch.argmax(out, dim=1)
+      correctas_top1 = (preds == labels[:, idx]).sum().item() 
+      top1_correct += correctas_top1 
+      top1_by_rank[idx] += correctas_top1
 
-    #   # Top-5
-    #   top5_preds = torch.topk(out, k=5, dim=1).indices
-    #   correctas_top5 = (top5_preds == labels[:, idx].unsqueeze(1)).any(dim=1).sum().item() 
-    #   top5_correct += correctas_top5
-    #   top5_by_rank[idx] += correctas_top5
-
+      # Top-5
+      top5_preds = torch.topk(out, k=5, dim=1).indices
+      correctas_top5 = (top5_preds == labels[:, idx].unsqueeze(1)).any(dim=1).sum().item() 
+      top5_correct += correctas_top5
+      top5_by_rank[idx] += correctas_top5
+    
 
   top1_acc = top1_correct / total
   top5_acc = top5_correct / total
@@ -97,7 +97,7 @@ def train_epoch(model, dataloader, criterion, optimizer, device, loss_weights):
 
   return results
 
-def evaluate(model, dataloader, criterion, device, loss_weights):
+def evaluate(model, dataloader, criterion, device):
   """Evaluate model"""
   model.eval()
   
@@ -118,7 +118,7 @@ def evaluate(model, dataloader, criterion, device, loss_weights):
     
     for inputs, labels in pbar:
     
-      labels = labels.to(device)
+      labels = translate_label(labels).to(device)
       outputs = model(inputs)
       
       loss, loss_by_rank = do_criterion_by_rank(outputs, labels, criterion, device)
@@ -141,6 +141,7 @@ def evaluate(model, dataloader, criterion, device, loss_weights):
         correctas_top5 = (top5_preds == labels[:, idx].unsqueeze(1)).any(dim=1).sum().item() 
         top5_correct += correctas_top5
         top5_by_rank[idx] += correctas_top5
+    
 
   top1_acc = top1_correct / total
   top5_acc = top5_correct / total
